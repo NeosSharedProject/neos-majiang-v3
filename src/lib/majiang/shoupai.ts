@@ -1,9 +1,10 @@
+// @ts-nocheck
 /*
  *  Majiang.Shoupai
  */
 "use strict";
 
-module.exports = class Shoupai {
+export default class Shoupai {
   static valid_pai(p) {
     if (p.match(/^(?:[mps]\d|z[1-7])_?\*?[\+\=\-]?$/)) return p;
   }
@@ -414,4 +415,4 @@ module.exports = class Shoupai {
     }
     return mianzi;
   }
-};
+}

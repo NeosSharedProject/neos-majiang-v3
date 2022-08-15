@@ -1,3 +1,4 @@
+// @ts-nocheck
 /*
  *  Majiang.Board
  */
@@ -8,6 +9,7 @@ const Majiang = {
   He: require("./he"),
 };
 
+// TODO これ何？
 class Shan {
   constructor(baopai) {
     this.paishu = 136 - 13 * 4 - 14;
@@ -23,7 +25,7 @@ class Shan {
   }
 }
 
-module.exports = class Board {
+export default class Board {
   constructor(kaiju) {
     if (kaiju) this.kaiju(kaiju);
   }
@@ -129,4 +131,4 @@ module.exports = class Board {
       if (pingju.shoupai[l]) this.shoupai[l].fromString(pingju.shoupai[l]);
     }
   }
-};
+}

@@ -1,7 +1,9 @@
+// @ts-nocheck
 /*
  *  Majiang.Player
  */
-"use strict";
+import Board from "./board";
+import { Message, MessageKaiju, MessageReply } from "./types";
 
 const Majiang = {
   Shoupai: require("./shoupai"),
@@ -11,7 +13,22 @@ const Majiang = {
   Util: Object.assign(require("./xiangting"), require("./hule")),
 };
 
-module.exports = class Player {
+type hoge = {
+  a: {
+    c: number;
+  };
+};
+type hage = { b: { b: string } };
+type hamage = hoge | hage;
+
+const h: hamage = { a: { c: 10 } };
+if (h.a) {
+  h;
+}
+
+export default class Player {
+  _callback: () => {} | null;
+  _model: Board;
   /**
    * _model に空の卓情報をもつインスタンスを生成する。
    */
@@ -19,7 +36,7 @@ module.exports = class Player {
     /**
      * Majiang.Board で設定する 卓情報。
      */
-    this._model = new Majiang.Board();
+    this._model = new Board();
   }
 
   /**
@@ -27,7 +44,7 @@ module.exports = class Player {
    * @param {Majiang.Message} msg
    * @param {function} callback
    */
-  action(msg, callback) {
+  action(msg: Message, callback: (MessageReply?) => {}) {
     /**
      * Majiang.Player#action 呼び出し時に指定された応答送信用関数。
      */
@@ -308,4 +325,4 @@ module.exports = class Player {
   allow_pingju(shoupai) {
     return Majiang.Game.allow_pingju(this._rule, shoupai, this._diyizimo);
   }
-};
+}

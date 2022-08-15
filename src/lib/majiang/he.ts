@@ -1,3 +1,4 @@
+// @ts-nocheck
 /*
  *  Majiang.He
  */
@@ -5,7 +6,7 @@
 
 const Majiang = { Shoupai: require("./shoupai") };
 
-module.exports = class He {
+export default class He {
   constructor() {
     this._pai = [];
     this._find = {};
@@ -31,4 +32,4 @@ module.exports = class He {
   find(p) {
     return this._find[p[0] + (+p[1] || 5)];
   }
-};
+}

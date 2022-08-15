@@ -1,3 +1,4 @@
+// @ts-nocheck
 /*
  *  Majiang.Util.hule
  */

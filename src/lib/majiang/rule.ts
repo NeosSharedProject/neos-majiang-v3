@@ -1,9 +1,10 @@
+// @ts-nocheck
 /*
  *  Majinng.rule
  */
 "use strict";
 
-module.exports = function (param = {}) {
+export default rule = function (param = {}) {
   let rule = {
     /* 点数関連 */
     配給原点: 25000,

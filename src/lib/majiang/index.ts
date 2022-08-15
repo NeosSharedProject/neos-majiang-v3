@@ -1,3 +1,4 @@
+// @ts-nocheck
 /*!
  *  @kobalab/majiang-core v0.2.9
  *
@@ -8,7 +9,7 @@
 
 "use strict";
 
-module.exports = {
+export default {
   rule: require("./rule"),
   Shoupai: require("./shoupai"),
   Shan: require("./shan"),

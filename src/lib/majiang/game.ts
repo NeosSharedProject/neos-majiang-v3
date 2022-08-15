@@ -1,7 +1,11 @@
+// @ts-nocheck
 /*
  *  Majiang.Game
  */
-"use strict";
+
+import Player from "./player";
+import Shoupai from "./shoupai";
+import { Hai, Mentu, Message, Rule } from "./types";
 
 const Majiang = {
   rule: require("./rule"),
@@ -11,15 +15,20 @@ const Majiang = {
   Util: Object.assign(require("./xiangting"), require("./hule")),
 };
 
-module.exports = class Game {
+export default class Game {
   /**
    *players で指定された4名を対局者とし、rule で指定されたルールにしたがい対局を行う。 対局終了時に callback で指定した関数が呼ばれる(対局の牌譜が引数で渡される)。 title で牌譜に残すタイトルを指定できる。 rule を省略した場合は、Majiang.rule() の呼び出しで得られるルールの初期値が採用される。
    * @param {Majiang.Player[]} players
    * @param {function} callback
-   * @param {Majiang.Rule} rule
+   * @param {Rule} rule
    * @param {string} title
    */
-  constructor(players, callback, rule, title) {
+  constructor(
+    players: Player[],
+    callback?: () => {},
+    rule?: Rule,
+    title?: string
+  ): void {
     /**
      *インスタンス生成時に指定された Majiang.Player の配列。
      * @type {Majiang.Player[]}
@@ -32,9 +41,9 @@ module.exports = class Game {
     this._callback = callback || (() => {});
     /**
      *インスタンス生成時に指定された ルール。
-     * @type {Majiang.Rule}
+     * @type {Rule}
      */
-    this._rule = rule || Majiang.rule();
+    this._rule = rule || Rule();
     /**
      * 卓情報
      */
@@ -155,7 +164,7 @@ module.exports = class Game {
    * @param {string} type
    * @param {Majiang.Message} msg
    */
-  notify_players(type, msg) {
+  notify_players(type: string, msg: Message) {
     for (let l = 0; l < 4; l++) {
       let id = this._model.player_id[l];
       if (this._sync) this._players[id].action(msg[l]);
@@ -253,9 +262,9 @@ module.exports = class Game {
 
   /**
    * 非同期モードで対局を開始する。 qijia で起家を指定することもできる(0〜3)。 qijia を指定しない場合はランダムに起家を決定する。
-   * @param {0|1|2} qijia
+   * @param {0|1|2|3} qijia
    */
-  kaiju(qijia) {
+  kaiju(qijia?: 0 | 1 | 2 | 3): void {
     this._model.qijia = qijia == null ? Math.floor(Math.random() * 4) : qijia;
     this._paipu = {
       title: this._model.title,
@@ -295,7 +304,7 @@ module.exports = class Game {
    * 配牌の局進行
    * @param {Majiang.Shan} shan 牌山
    */
-  qipai(shan) {
+  qipai(shan?: Shan): void {
     let model = this._model;
 
     model.shan = shan || new Majiang.Shan(this._rule);
@@ -401,7 +410,7 @@ module.exports = class Game {
   /**
    *ツモの局進行を行う。
    */
-  zimo() {
+  zimo(): void {
     let model = this._model;
 
     model.lunban = (model.lunban + 1) % 4;
@@ -424,9 +433,9 @@ module.exports = class Game {
 
   /**
    *dapai で指定された牌を打牌する局進行を行う。
-   * @param {string} dapai 牌
+   * @param {Hai} dapai 牌
    */
-  dapai(dapai) {
+  dapai(dapai: Hai): void {
     let model = this._model;
 
     this._yifa[model.lunban] = 0;
@@ -475,9 +484,9 @@ module.exports = class Game {
 
   /**
    * fulou で指定された面子を副露する局進行を行う。 大明槓は副露に含める。
-   * @param {string} fulou 面子
+   * @param {Mentu} fulou 面子
    */
-  fulou(fulou) {
+  fulou(fulou: Mentu): void {
     let model = this._model;
 
     this._diyizimo = false;
@@ -511,7 +520,7 @@ module.exports = class Game {
    * gang で指定された面子で加槓あるいは暗槓する局進行を行う。
    * @param {string} gang 面子
    */
-  gang(gang) {
+  gang(gang: Mentu): void {
     let model = this._model;
 
     model.shoupai[model.lunban].gang(gang);
@@ -536,7 +545,7 @@ module.exports = class Game {
   /**
    * リンシャン牌ツモの局進行を行う。
    */
-  gangzimo() {
+  gangzimo(): void {
     let model = this._model;
 
     this._diyizimo = false;
@@ -563,9 +572,8 @@ module.exports = class Game {
 
   /**
    * 開槓の局進行を行う。
-   * @returns
    */
-  kaigang() {
+  kaigang(): void {
     this._gang = null;
 
     if (!this._rule["カンドラあり"]) return;
@@ -590,7 +598,7 @@ module.exports = class Game {
   /**
    *和了の局進行を行う。
    */
-  hule() {
+  hule(): void {
     let model = this._model;
 
     if (this._status != "hule") {
@@ -676,7 +684,10 @@ module.exports = class Game {
    * @param {string} name
    * @param {string[]} shoupai 牌姿の配列
    */
-  pingju(name, shoupai = ["", "", "", ""]) {
+  pingju(
+    name: string,
+    shoupai: [Haisi | Haisi | Haisi | Haisi] = ["", "", "", ""]
+  ): void {
     let model = this._model;
 
     let fenpei = [0, 0, 0, 0];
@@ -772,7 +783,7 @@ module.exports = class Game {
   /**
    *対局終了の判断を行う。
    */
-  last() {
+  last(): void {
     let model = this._model;
 
     model.lunban = -1;
@@ -827,7 +838,7 @@ module.exports = class Game {
   /**
    *対局終了の処理を行う。
    */
-  jieju() {
+  jieju(): void {
     let model = this._model;
 
     let paiming = [];
@@ -876,7 +887,7 @@ module.exports = class Game {
    * @param {number} l
    * @returns {Majiang.Message}
    */
-  get_reply(l) {
+  get_reply(l: number): Message {
     let model = this._model;
     return this._reply[model.player_id[l]];
   }
@@ -884,22 +895,21 @@ module.exports = class Game {
   /**
    * 配牌の局進行メソッドを呼び出す。
    */
-  reply_kaiju() {
+  reply_kaiju(): void {
     this.delay(() => this.qipai(), 0);
   }
 
   /**
    * ツモの局進行メソッドを呼び出す。
    */
-  reply_qipai() {
+  reply_qipai(): void {
     this.delay(() => this.zimo(), 0);
   }
 
   /**
    * ツモ応答の妥当性を確認し、次の局進行メソッドを呼び出す。
-   * @returns
    */
-  reply_zimo() {
+  reply_zimo(): void {
     let model = this._model;
 
     let reply = this.get_reply(model.lunban);
@@ -936,9 +946,8 @@ module.exports = class Game {
 
   /**
    * 打牌応答の妥当性を確認し、次の局進行メソッドを呼び出す。
-   * @returns
    */
-  reply_dapai() {
+  reply_dapai(): void {
     let model = this._model;
 
     for (let i = 1; i < 4; i++) {
@@ -1030,9 +1039,8 @@ module.exports = class Game {
 
   /**
    * 副露応答の妥当性を確認し、次の局進行メソッドを呼び出す。
-   * @returns
    */
-  reply_fulou() {
+  reply_fulou(): void {
     let model = this._model;
 
     if (this._gang) {
@@ -1052,9 +1060,8 @@ module.exports = class Game {
 
   /**
    * 槓応答の妥当性を確認し、次の局進行メソッドを呼び出す。
-   * @returns
    */
-  reply_gang() {
+  reply_gang(): void {
     let model = this._model;
 
     if (this._gang.match(/^[mpsz]\d{4}$/)) {
@@ -1084,7 +1091,7 @@ module.exports = class Game {
   /**
    * 和了応答の妥当性を確認し、次の局進行メソッドを呼び出す。
    */
-  reply_hule() {
+  reply_hule(): void {
     let model = this._model;
 
     for (let l = 0; l < 4; l++) {
@@ -1104,7 +1111,7 @@ module.exports = class Game {
   /**
    * 流局応答の妥当性を確認し、次の局進行メソッドを呼び出す。
    */
-  reply_pingju() {
+  reply_pingju(): void {
     let model = this._model;
 
     for (let l = 0; l < 4; l++) {
@@ -1119,7 +1126,7 @@ module.exports = class Game {
    * Majiang.Game#static-get_dapai を呼び出し、インスタンス変数 _rule にしたがって現在の手番の手牌から打牌可能な牌の一覧を返す。
    * @returns {string[]} 牌の配列
    */
-  get_dapai() {
+  get_dapai(): void {
     let model = this._model;
     return Game.get_dapai(this._rule, model.shoupai[model.lunban]);
   }
@@ -1129,7 +1136,7 @@ module.exports = class Game {
    * @param {number} l
    * @returns {string[]} 面子の配列
    */
-  get_chi_mianzi(l) {
+  get_chi_mianzi(l): void {
     let model = this._model;
     let d = "_+=-"[(4 + model.lunban - l) % 4];
     return Game.get_chi_mianzi(
@@ -1145,7 +1152,7 @@ module.exports = class Game {
    * @param {number} l
    * @returns {string[]} 面子の配列
    */
-  get_peng_mianzi(l) {
+  get_peng_mianzi(l): void {
     let model = this._model;
     let d = "_+=-"[(4 + model.lunban - l) % 4];
     return Game.get_peng_mianzi(
@@ -1161,7 +1168,7 @@ module.exports = class Game {
    * @param {number} l
    * @returns {string[]} 面子の配列
    */
-  get_gang_mianzi(l) {
+  get_gang_mianzi(l): void {
     let model = this._model;
     if (l == null) {
       return Game.get_gang_mianzi(
@@ -1185,10 +1192,10 @@ module.exports = class Game {
 
   /**
    * Majiang.Game#static-allow_lizhi を呼び出し、インスタンス変数 _rule にしたがってリーチ可能か判定する。 p が null のときはリーチ可能な打牌一覧を返す。 p が 牌 のときは p を打牌してリーチ可能なら true を返す。
-   * @param {string} p 牌
-   * @returns {string[]|boolean} 牌の配列か真偽値
+   * @param {Hai} p 牌
+   * @returns {Hai[]|boolean} 牌の配列か真偽値
    */
-  allow_lizhi(p) {
+  allow_lizhi(p: Hai): Hai[] | boolean {
     let model = this._model;
     return Game.allow_lizhi(
       this._rule,
@@ -1204,7 +1211,7 @@ module.exports = class Game {
    * @param {number} l
    * @returns {boolean}
    */
-  allow_hule(l) {
+  allow_hule(l?: number): boolean {
     let model = this._model;
     if (l == null) {
       let hupai =
@@ -1244,7 +1251,7 @@ module.exports = class Game {
    * Majiang.Game#static-allow_pingju を呼び出し、インスタンス変数 _rule にしたがって現在の手番が九種九牌流局可能か判定する。
    * @returns {boolean}
    */
-  allow_pingju() {
+  allow_pingju(): boolean {
     let model = this._model;
     return Game.allow_pingju(
       this._rule,
@@ -1255,11 +1262,11 @@ module.exports = class Game {
 
   /**
    *Majiang.Shoupai#get_dapai を呼び出し、rule にしたがって shoupai から打牌可能な牌の一覧を返す。
-   * @param {Majiang.Rule} rule
-   * @param {Majiang.Shoupai} shoupai
-   * @returns {string[]}
+   * @param {Rule} rule
+   * @param {Shoupai} shoupai
+   * @returns {Hai[]}
    */
-  static get_dapai(rule, shoupai) {
+  static get_dapai(rule: Rule, shoupai: Shoupai): Hai[] {
     if (rule["喰い替え許可レベル"] == 0) return shoupai.get_dapai(true);
     if (
       rule["喰い替え許可レベル"] == 1 &&
@@ -1277,13 +1284,18 @@ module.exports = class Game {
 
   /**
    * Majiang.Shoupai#get_chi_mianzi を呼び出し、rule にしたがって shoupai から p でチー可能な面子の一覧を返す。 paishu には現在の残り牌数を指定すること。
-   * @param {Majiang.Rule} rule
-   * @param {Majiang.Shoupai} shoupai
-   * @param {string} p
+   * @param {Rule} rule
+   * @param {Shoupai} shoupai
+   * @param {Hai} p
    * @param {number} paishu
-   * @returns {string[]}
+   * @returns {Hai[]}
    */
-  static get_chi_mianzi(rule, shoupai, p, paishu) {
+  static get_chi_mianzi(
+    rule: Rule,
+    shoupai: Shoupai,
+    p: Hai,
+    paishu: number
+  ): Hai[] {
     let mianzi = shoupai.get_chi_mianzi(p, rule["喰い替え許可レベル"] == 0);
     if (!mianzi) return mianzi;
     if (
@@ -1297,13 +1309,18 @@ module.exports = class Game {
 
   /**
    * Majiang.Shoupai#get_peng_mianzi を呼び出し、rule にしたがって shoupai から p でポン可能な面子の一覧を返す。 paishu には現在の残り牌数を指定すること。
-   * @param {Majiang.Rule} rule
-   * @param {Majiang.Shoupai} shoupai
-   * @param {string} p
+   * @param {Rule} rule
+   * @param {Shoupai} shoupai
+   * @param {Hai} p
    * @param {number} paishu
-   * @returns {string[]}
+   * @returns {Hai[]}
    */
-  static get_peng_mianzi(rule, shoupai, p, paishu) {
+  static get_peng_mianzi(
+    rule: Rule,
+    shoupai: Shoupai,
+    p: Hai,
+    paishu: number
+  ): Hai[] {
     let mianzi = shoupai.get_peng_mianzi(p);
     if (!mianzi) return mianzi;
     return paishu == 0 ? [] : mianzi;
@@ -1311,14 +1328,14 @@ module.exports = class Game {
 
   /**
    * Majiang.Shoupai#get_gang_mianzi を呼び出し、rule にしたがって shoupai からカン可能な面子の一覧を返す。 p が指定された場合は大明槓、null の場合は暗槓と加槓が対象になる。 paishu には現在の残り牌数、n_gang にはその局に行われた槓の数を指定すること。
-   * @param {Majiang.Rule} rule
+   * @param {Rule} rule
    * @param {Majiang.Shoupai} shoupai
    * @param {string} p
    * @param {number} paishu
    * @param {number} n_gang
    * @returns {string[]}
    */
-  static get_gang_mianzi(rule, shoupai, p, paishu, n_gang) {
+  static get_gang_mianzi(rule: Rule, shoupai: Shoupai, p: Hai, paishu, n_gang) {
     let mianzi = shoupai.get_gang_mianzi(p);
     if (!mianzi || mianzi.length == 0) return mianzi;
 
@@ -1351,7 +1368,7 @@ module.exports = class Game {
 
   /**
    * rule にしたがって shoupai からリーチ可能か判定する。 p が null のときはリーチ可能な打牌一覧を返す。 p が 牌 のときは p を打牌してリーチ可能なら true を返す。 paishu には現在の残り牌数、defen には現在の持ち点を指定すること。
-   * @param {Majiang.Rule} rule
+   * @param {Rule} rule
    * @param {Majiang.Shoupai} shoupai
    * @param {string} p
    * @param {number} paishu
@@ -1443,4 +1460,4 @@ module.exports = class Game {
     }
     return n_yaojiu >= 9;
   }
-};
+}

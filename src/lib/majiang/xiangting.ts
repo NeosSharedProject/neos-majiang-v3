@@ -1,3 +1,4 @@
+// @ts-nocheck
 /*
  *  Majiang.Util.xiangting
  */
@@ -191,7 +192,7 @@ function tingpai(shoupai, f_xiangting = xiangting) {
   return pai;
 }
 
-module.exports = {
+export default {
   xiangting_guoshi: xiangting_guoshi,
   xiangting_qidui: xiangting_qidui,
   xiangting_yiban: xiangting_yiban,
