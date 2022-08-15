@@ -4,14 +4,8 @@
  */
 import Board from "./board";
 import { Message, MessageKaiju, MessageReply } from "./types";
-
-const Majiang = {
-  Shoupai: require("./shoupai"),
-  He: require("./he"),
-  Game: require("./game"),
-  Board: require("./board"),
-  Util: Object.assign(require("./xiangting"), require("./hule")),
-};
+import Game from "./game";
+import Util from "./util";
 
 type hoge = {
   a: {
@@ -74,9 +68,7 @@ export default class Player {
   }
   get hulepai() {
     return (
-      (Majiang.Util.xiangting(this.shoupai) == 0 &&
-        Majiang.Util.tingpai(this.shoupai)) ||
-      []
+      (Util.xiangting(this.shoupai) == 0 && Util.tingpai(this.shoupai)) || []
     );
   }
 
@@ -232,7 +224,7 @@ export default class Player {
    * @returns {string[]} 牌の配列
    */
   get_dapai(shoupai) {
-    return Majiang.Game.get_dapai(this._rule, shoupai);
+    return Game.get_dapai(this._rule, shoupai);
   }
 
   /**
@@ -242,12 +234,7 @@ export default class Player {
    * @returns {string[]} 面子の配列
    */
   get_chi_mianzi(shoupai, p) {
-    return Majiang.Game.get_chi_mianzi(
-      this._rule,
-      shoupai,
-      p,
-      this.shan.paishu
-    );
+    return Game.get_chi_mianzi(this._rule, shoupai, p, this.shan.paishu);
   }
 
   /**
@@ -257,12 +244,7 @@ export default class Player {
    * @returns {string[]} 面子の配列
    */
   get_peng_mianzi(shoupai, p) {
-    return Majiang.Game.get_peng_mianzi(
-      this._rule,
-      shoupai,
-      p,
-      this.shan.paishu
-    );
+    return Game.get_peng_mianzi(this._rule, shoupai, p, this.shan.paishu);
   }
 
   /**
@@ -272,7 +254,7 @@ export default class Player {
    * @returns {string[]} 面子の配列
    */
   get_gang_mianzi(shoupai, p) {
-    return Majiang.Game.get_gang_mianzi(
+    return Game.get_gang_mianzi(
       this._rule,
       shoupai,
       p,
@@ -288,7 +270,7 @@ export default class Player {
    * @returns {boolean}
    */
   allow_lizhi(shoupai, p) {
-    return Majiang.Game.allow_lizhi(
+    return Game.allow_lizhi(
       this._rule,
       shoupai,
       p,
@@ -306,7 +288,7 @@ export default class Player {
    */
   allow_hule(shoupai, p, hupai) {
     hupai = hupai || shoupai.lizhi || this.shan.paishu == 0;
-    return Majiang.Game.allow_hule(
+    return Game.allow_hule(
       this._rule,
       shoupai,
       p,
@@ -323,6 +305,6 @@ export default class Player {
    * @returns {boolean}
    */
   allow_pingju(shoupai) {
-    return Majiang.Game.allow_pingju(this._rule, shoupai, this._diyizimo);
+    return Game.allow_pingju(this._rule, shoupai, this._diyizimo);
   }
 }

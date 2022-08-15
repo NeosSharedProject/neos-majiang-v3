@@ -6,7 +6,13 @@
 import Shoupai from "./shoupai";
 
 export default class He {
+  /**
+   * 捨てられた 牌 を表す配列。
+   */
   _pai: [];
+  /**
+   * 特定の 牌 が捨て牌にあるか判定するためのキャッシュ。
+   */
   _find: any;
 
   constructor() {

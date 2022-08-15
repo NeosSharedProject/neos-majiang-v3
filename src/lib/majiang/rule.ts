@@ -4,7 +4,7 @@
  */
 "use strict";
 
-export default rule = function (param = {}) {
+export default function (param = {}) {
   let rule = {
     /* 点数関連 */
     配給原点: 25000,
@@ -55,4 +55,4 @@ export default rule = function (param = {}) {
   }
 
   return rule;
-};
+}

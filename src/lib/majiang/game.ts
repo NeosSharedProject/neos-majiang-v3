@@ -6,14 +6,18 @@
 import Player from "./player";
 import Shoupai from "./shoupai";
 import { Hai, Mentu, Message, MessageReply, Paipu, Rule } from "./types";
+import defaultRule from "./rule";
+import Shan from "./shan";
+import He from "./he";
+import Util from "./util";
 
-const Majiang = {
-  rule: require("./rule"),
-  Shoupai: require("./shoupai"),
-  Shan: require("./shan"),
-  He: require("./he"),
-  Util: Object.assign(require("./xiangting"), require("./hule")),
-};
+// const Majiang = {
+//   rule: require("./rule"),
+//   Shoupai: require("./shoupai"),
+//   Shan: require("./shan"),
+//   He: require("./he"),
+//   Util: Object.assign(require("./xiangting"), require("./hule")),
+// };
 
 export default class Game {
   /**
@@ -142,24 +146,9 @@ export default class Game {
     rule?: Rule,
     title?: string
   ): void {
-    /**
-     *インスタンス生成時に指定された Majiang.Player の配列。
-     * @type {Majiang.Player[]}
-     */
     this._players = players;
-    /**
-     *インスタンス生成時に指定された対局終了時に呼び出す関数。
-     * @type {function}
-     */
     this._callback = callback || (() => {});
-    /**
-     *インスタンス生成時に指定された ルール。
-     * @type {Rule}
-     */
-    this._rule = rule || Rule();
-    /**
-     * 卓情報
-     */
+    this._rule = rule || defaultRule();
     this._model = {
       title: title || "電脳麻将\n" + new Date().toLocaleString(),
       player: ["私", "下家", "対面", "上家"],
@@ -175,39 +164,14 @@ export default class Game {
       player_id: [0, 1, 2, 3],
     };
 
-    /**
-     * 卓情報 を描画するクラス。 Majiang.Game からは適切なタイミングでメソッドを呼び出して描画のきっかけを与える。
-     */
     this._view;
-
-    /**
-     *Majiang.Game#call_players を呼び出した際の type を保存する。
-     */
     this._status;
-    /**
-     * 対局者からの応答を格納する配列。 Majiang.Game#call_players 呼び出し時に配列を生成する。
-     */
     this._reply = [];
 
-    /**
-     * true の場合、同期モードとなり、setTimeout() による非同期呼び出しは行わない。
-     */
     this._sync = false;
-    /**
-     * 関数が設定されている場合、Majiang.Game#next 呼び出しの際にその関数を呼び出して処理を停止する。
-     */
     this._stop = null;
-    /**
-     * 局の進行速度。0～5 で指定する。初期値は 3。 指定された速度 × 200(ms) で Majiang.Game#next を呼び出すことで局の進行速度を調整する。
-     */
     this._speed = 3;
-    /**
-     * ダイアログへの応答速度(ms)。初期値は 0。 指定された時間後に Majiang.Game#next を呼び出す。
-     */
     this._wait = 0;
-    /**
-     * 非同期で Majiang.Game#next を呼び出すタイマーのID。 値が設定されていれば非同期呼出し待ちであり、clearTimeout() を呼び出せば非同期呼出しをキャンセルできる。
-     */
     this._timeout_id;
   }
 
@@ -415,82 +379,37 @@ export default class Game {
 
   /**
    * 配牌の局進行
-   * @param {Majiang.Shan} shan 牌山
+   * @param {Shan} shan 牌山
    */
   qipai(shan?: Shan): void {
     let model = this._model;
 
-    model.shan = shan || new Majiang.Shan(this._rule);
+    model.shan = shan || new Shan(this._rule);
     let qipai = [];
     for (let l = 0; l < 4; l++) {
       qipai[l] = [];
       for (let i = 0; i < 13; i++) {
         qipai[l].push(model.shan.zimo());
       }
-      model.shoupai[l] = new Majiang.Shoupai(qipai[l]);
-      model.he[l] = new Majiang.He();
+      model.shoupai[l] = new Shoupai(qipai[l]);
+      model.he[l] = new He();
       model.player_id[l] = (model.qijia + model.jushu + l) % 4;
     }
     model.lunban = -1;
 
-    /**
-     *第一ツモ巡の間は true。
-     */
     this._diyizimo = true;
-    /**
-     *四風連打の可能性がある間は true。
-     */
     this._fengpai = this._rule["途中流局あり"];
-
-    /**
-     * 最後に打牌した 牌。次の打牌で上書きする。
-     */
     this._dapai = null;
-    /**
-     * 現在処理中のカンの 面子。開槓すると null に戻す。
-     */
     this._gang = null;
-
-    /**
-     * 各対局者(その局の東家からの順)のリーチ状態を示す配列。 0: リーチなし、1: 通常のリーチ、2: ダブルリーチ。
-     */
     this._lizhi = [0, 0, 0, 0];
-    /**
-     *各対局者が一発可能かを示す配列。 添え字は手番(0: 東、1: 南、2: 西、3: 北)。
-     */
     this._yifa = [0, 0, 0, 0];
-    /**
-     * 各対局者が行ったカンの数。 添え字は手番(0: 東、1: 南、2: 西、3: 北)。
-     */
     this._n_gang = [0, 0, 0, 0];
-    /**
-     * 各対局者のフリテン状態。 添え字は手番(0: 東、1: 南、2: 西、3: 北)。 ロン和了可能なら true。
-     */
     this._neng_rong = [1, 1, 1, 1];
-
-    /**
-     * 和了応答した対局者の手番(0: 東、1: 南、2: 西、3: 北)の配列。 南家、西家のダブロンの時は [ 1, 2 ] となる。
-     */
     this._hule = [];
-    /**
-     * 処理中の和了が槍槓のとき qiangang、嶺上開花のとき lingshang、それ以外なら null。
-     */
     this._hule_option = null;
-    /**
-     * 途中流局の処理中のとき true。
-     */
     this._no_game = false;
-    /**
-     *連荘の処理中のとき true。
-     */
     this._lianzhuang = false;
-    /**
-     * 現在処理中の局開始時の積み棒の数。
-     */
     this._changbang = model.changbang;
-    /**
-     * 現在処理中の和了、あるいは流局で移動する点数の配列。 添え字は手番(0: 東、1: 南、2: 西、3: 北)。
-     */
     this._fenpei = null;
 
     this._paipu.defen = model.defen.concat();
@@ -571,8 +490,8 @@ export default class Game {
     }
 
     if (
-      Majiang.Util.xiangting(model.shoupai[model.lunban]) == 0 &&
-      Majiang.Util.tingpai(model.shoupai[model.lunban]).find((p) =>
+      Util.xiangting(model.shoupai[model.lunban]) == 0 &&
+      Util.tingpai(model.shoupai[model.lunban]).find((p) =>
         model.he[model.lunban].find(p)
       )
     ) {
@@ -756,7 +675,7 @@ export default class Game {
       fubaopai: fubaopai,
       jicun: { changbang: model.changbang, lizhibang: model.lizhibang },
     };
-    let hule = Majiang.Util.hule(shoupai, rongpai, param);
+    let hule = Util.hule(shoupai, rongpai, param);
 
     if (this._rule["連荘方式"] > 0 && menfeng == 0) this._lianzhuang = true;
     if (this._rule["場数"] == 0) this._lianzhuang = false;
@@ -821,8 +740,8 @@ export default class Game {
         ) {
           shoupai[l] = "";
         } else if (
-          Majiang.Util.xiangting(model.shoupai[l]) == 0 &&
-          Majiang.Util.tingpai(model.shoupai[l]).length > 0
+          Util.xiangting(model.shoupai[l]) == 0 &&
+          Util.tingpai(model.shoupai[l]).length > 0
         ) {
           n_tingpai++;
           shoupai[l] = model.shoupai[l].toString();
@@ -1072,7 +991,7 @@ export default class Game {
         this._hule.push(l);
       } else {
         let shoupai = model.shoupai[l].clone().zimo(this._dapai);
-        if (Majiang.Util.xiangting(shoupai) == -1) this._neng_rong[l] = false;
+        if (Util.xiangting(shoupai) == -1) this._neng_rong[l] = false;
       }
     }
     if (this._hule.length == 3 && this._rule["最大同時和了数"] == 2) {
@@ -1191,7 +1110,7 @@ export default class Game {
       } else {
         let p = this._gang[0] + this._gang.substr(-1);
         let shoupai = model.shoupai[l].clone().zimo(p);
-        if (Majiang.Util.xiangting(shoupai) == -1) this._neng_rong[l] = false;
+        if (Util.xiangting(shoupai) == -1) this._neng_rong[l] = false;
       }
     }
     if (this._hule.length) {
@@ -1465,20 +1384,20 @@ export default class Game {
           n_hule1 = 0,
           n_hule2 = 0;
         new_shoupai = shoupai.clone().dapai(shoupai._zimo);
-        for (let p of Majiang.Util.tingpai(new_shoupai)) {
-          n_hule1 += Majiang.Util.hule_mianzi(new_shoupai, p).length;
+        for (let p of Util.tingpai(new_shoupai)) {
+          n_hule1 += Util.hule_mianzi(new_shoupai, p).length;
         }
         new_shoupai = shoupai.clone().gang(mianzi[0]);
-        for (let p of Majiang.Util.tingpai(new_shoupai)) {
-          n_hule2 += Majiang.Util.hule_mianzi(new_shoupai, p).length;
+        for (let p of Util.tingpai(new_shoupai)) {
+          n_hule2 += Util.hule_mianzi(new_shoupai, p).length;
         }
         if (n_hule1 > n_hule2) return [];
       } else {
         let new_shoupai;
         new_shoupai = shoupai.clone().dapai(shoupai._zimo);
-        let n_tingpai1 = Majiang.Util.tingpai(new_shoupai).length;
+        let n_tingpai1 = Util.tingpai(new_shoupai).length;
         new_shoupai = shoupai.clone().gang(mianzi[0]);
-        let n_tingpai2 = Majiang.Util.tingpai(new_shoupai).length;
+        let n_tingpai2 = Util.tingpai(new_shoupai).length;
         if (n_tingpai1 != n_tingpai2) return [];
       }
     }
@@ -1508,21 +1427,20 @@ export default class Game {
     if (!rule["ツモ番なしリーチあり"] && paishu < 4) return false;
     if (rule["トビ終了あり"] && defen < 1000) return false;
 
-    if (Majiang.Util.xiangting(shoupai) > 0) return false;
+    if (Util.xiangting(shoupai) > 0) return false;
 
     if (p) {
       let new_shoupai = shoupai.clone().dapai(p);
       return (
-        Majiang.Util.xiangting(new_shoupai) == 0 &&
-        Majiang.Util.tingpai(new_shoupai).length > 0
+        Util.xiangting(new_shoupai) == 0 && Util.tingpai(new_shoupai).length > 0
       );
     } else {
       let dapai = [];
       for (let p of Game.get_dapai(rule, shoupai)) {
         let new_shoupai = shoupai.clone().dapai(p);
         if (
-          Majiang.Util.xiangting(new_shoupai) == 0 &&
-          Majiang.Util.tingpai(new_shoupai).length > 0
+          Util.xiangting(new_shoupai) == 0 &&
+          Util.tingpai(new_shoupai).length > 0
         ) {
           dapai.push(p);
         }
@@ -1555,7 +1473,7 @@ export default class Game {
 
     let new_shoupai = shoupai.clone();
     if (p) new_shoupai.zimo(p);
-    if (Majiang.Util.xiangting(new_shoupai) != -1) return false;
+    if (Util.xiangting(new_shoupai) != -1) return false;
 
     if (hupai) return true;
 
@@ -1567,7 +1485,7 @@ export default class Game {
       baopai: [],
       jicun: { changbang: 0, lizhibang: 0 },
     };
-    let hule = Majiang.Util.hule(shoupai, p, param);
+    let hule = Util.hule(shoupai, p, param);
 
     return hule.hupai != null;
   }

@@ -4,10 +4,8 @@
  */
 "use strict";
 
-const Majiang = {
-  Shoupai: require("./shoupai"),
-  He: require("./he"),
-};
+import Shoupai from "./shoupai";
+import He from "./he";
 
 // TODO これ何？
 class Shan {
@@ -62,8 +60,8 @@ export default class Board {
     this.shan = new Shan(qipai.baopai);
     for (let l = 0; l < 4; l++) {
       let paistr = qipai.shoupai[l] || "_".repeat(13);
-      this.shoupai[l] = Majiang.Shoupai.fromString(paistr);
-      this.he[l] = new Majiang.He();
+      this.shoupai[l] = Shoupai.fromString(paistr);
+      this.he[l] = new He();
       this.player_id[l] = (this.qijia + this.jushu + l) % 4;
       this.defen[this.player_id[l]] = qipai.defen[l];
     }
