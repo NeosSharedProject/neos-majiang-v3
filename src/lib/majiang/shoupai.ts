@@ -5,11 +5,11 @@
 "use strict";
 
 export default class Shoupai {
-  static valid_pai(p) {
+  static valid_pai(p: Hai) {
     if (p.match(/^(?:[mps]\d|z[1-7])_?\*?[\+\=\-]?$/)) return p;
   }
 
-  static valid_mianzi(m) {
+  static valid_mianzi(m: Mentu) {
     let h = m[0] == "z" ? m.replace(/[089]/g, "") : m.replace(/0/g, "5");
     if (h.match(/^[mpsz](\d)\1\1[\+\=\-]\1?$/)) {
       return m.replace(/([mps])05/, "$1" + "50");
@@ -37,6 +37,50 @@ export default class Shoupai {
       return hongpai ? h.replace(/5/, "0") : h;
     }
   }
+
+  _bingpai: {
+    _: number;
+    m: [
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number
+    ];
+    p: [
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number
+    ];
+    s: [
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number,
+      number
+    ];
+    z: [number, number, number, number, number, number, number, number];
+  };
+  _fulou: [];
+  _zimo: any;
+  _lizhi: boolean;
 
   constructor(qipai = []) {
     this._bingpai = {
@@ -155,7 +199,7 @@ export default class Shoupai {
     return shoupai;
   }
 
-  fromString(paistr) {
+  fromString(paistr: string) {
     const shoupai = Shoupai.fromString(paistr);
     this._bingpai = {
       _: shoupai._bingpai._,
@@ -182,7 +226,7 @@ export default class Shoupai {
     }
   }
 
-  zimo(p, check = true) {
+  zimo(p: Hai, check = true) {
     if (check && this._zimo) throw new Error([this, p]);
     if (p == "_") {
       this._bingpai._++;
@@ -203,7 +247,7 @@ export default class Shoupai {
     return this;
   }
 
-  dapai(p, check = true) {
+  dapai(p: Hai, check = true) {
     if (check && !this._zimo) throw new Error([this, p]);
     if (!Shoupai.valid_pai(p)) throw new Error(p);
     let s = p[0],
@@ -214,7 +258,7 @@ export default class Shoupai {
     return this;
   }
 
-  fulou(m, check = true) {
+  fulou(m: Mentu, check = true) {
     if (check && this._zimo) throw new Error([this, m]);
     if (m != Shoupai.valid_mianzi(m)) throw new Error(m);
     let s = m[0];
@@ -229,7 +273,7 @@ export default class Shoupai {
     return this;
   }
 
-  gang(m, check = true) {
+  gang(m: Mentu, check = true) {
     if (m != Shoupai.valid_mianzi(m)) throw new Error(m);
     if (check && !this._zimo) throw new Error([this, m]);
     if (check && this._zimo.length > 2) throw new Error([this, m]);
@@ -295,7 +339,7 @@ export default class Shoupai {
     return dapai;
   }
 
-  get_chi_mianzi(p, check = true) {
+  get_chi_mianzi(p: Hai, check = true) {
     if (!Shoupai.valid_pai(p)) throw new Error(p);
     if (this._zimo) return null;
 
@@ -343,7 +387,7 @@ export default class Shoupai {
     return mianzi;
   }
 
-  get_peng_mianzi(p) {
+  get_peng_mianzi(p: Hai) {
     if (!Shoupai.valid_pai(p)) throw new Error(p);
     if (this._zimo) return null;
 
@@ -365,7 +409,7 @@ export default class Shoupai {
     return mianzi;
   }
 
-  get_gang_mianzi(p) {
+  get_gang_mianzi(p: Hai) {
     let mianzi = [];
     if (p) {
       if (!Shoupai.valid_pai(p)) throw new Error(p);

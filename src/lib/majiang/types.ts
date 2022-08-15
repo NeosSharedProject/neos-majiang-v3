@@ -47,149 +47,176 @@ export type Rule = {
  * 開局 (kaiju)
  * ゲームの開始
  */
+export type Kaiju = {
+  /** 席順。(0: 仮東、1: 仮南、2: 仮西、3: 仮北) */
+  id: number;
+  /** ルール。 */
+  rule: Rule;
+  /** 牌譜のタイトル。 */
+  title: string;
+  /** 対局者情報。仮東から順に並べる。 */
+  player: [string, string, string, string];
+  /** 起家。(0: 仮東、1: 仮南、2: 仮西、3: 仮北) */
+  qijia: number;
+};
+
+/** 開局メッセージ */
 export type MessageKaiju = {
   /** 開局 */
-  kaiju: {
-    /** 席順。(0: 仮東、1: 仮南、2: 仮西、3: 仮北) */
-    id: number;
-    /** ルール。 */
-    rule: Rule;
-    /** 牌譜のタイトル。 */
-    title: string;
-    /** 対局者情報。仮東から順に並べる。 */
-    player: [string, string, string, string];
-    /** 起家。(0: 仮東、1: 仮南、2: 仮西、3: 仮北) */
-    qijia: number;
-  };
+  kaiju: Kaiju;
 };
 
 /**
  * 配牌 (qipai)
  * 一局の開始
  */
+export type Qipai = {
+  /** 場風。(0: 東、1: 南、2: 西、3: 北) */
+  zhuangfeng: number;
+  /** 局数。(0: 一局、1: 二局、2: 三局、3: 四局) */
+  jushu: number;
+  /** 本場。 */
+  changbang: number;
+  /** その局開始時の供託リーチ棒の数。 */
+  lizhibang: number;
+  /** その局開始時の対局者の持ち点。その局の東家から順に並べる。 */
+  defen: [number, number, number, number];
+  /** ドラ表示牌。 */
+  baoapi: Hai;
+  /** 配牌の牌姿。その局の東家から順に並べる。他家の配牌はマスクして通知される。 */
+  shoupai: [Haisi, Haisi, Haisi, Haisi];
+};
+
+/** 配牌メッセージ */
 export type MessageQipai = {
   /** 配牌 */
-  qipai: {
-    /** 場風。(0: 東、1: 南、2: 西、3: 北) */
-    zhuangfeng: number;
-    /** 局数。(0: 一局、1: 二局、2: 三局、3: 四局) */
-    jushu: number;
-    /** 本場。 */
-    changbang: number;
-    /** その局開始時の供託リーチ棒の数。 */
-    lizhibang: number;
-    /** その局開始時の対局者の持ち点。その局の東家から順に並べる。 */
-    defen: [number, number, number, number];
-    /** ドラ表示牌。 */
-    baoapi: Hai;
-    /** 配牌の牌姿。その局の東家から順に並べる。他家の配牌はマスクして通知される。 */
-    shoupai: [Haisi, Haisi, Haisi, Haisi];
-  };
+  qipai: Qipai;
 };
 
 /**
  * 自摸 (zimo)
  */
+export type Zimo = {
+  /** 手番。(0: 東家、1: 南家、2: 西家、3: 北家) */
+  l: number;
+  /** 切った牌。 */
+  p: Hai;
+};
+
+/** 自摸メッセージ */
 export type MessageZimo = {
   /** 自摸 */
-  zimo: {
-    /** 手番。(0: 東家、1: 南家、2: 西家、3: 北家) */
-    l: number;
-    /** 切った牌。 */
-    p: Hai;
-  };
+  zimo: Zimo;
 };
 
 /**
  * 打牌 (dapai)
  */
+export type Dapai = {
+  /** 手番。(0: 東家、1: 南家、2: 西家、3: 北家) */
+  l: number;
+  /** 切った 牌。 */
+  p: Hai;
+};
+
+/** 打牌メッセージ */
 export type MessageDapai = {
   /** 打牌 */
-  dapai: {
-    /** 手番。(0: 東家、1: 南家、2: 西家、3: 北家) */
-    l: number;
-    /** 切った 牌。 */
-    p: Hai;
-  };
+  dapai: Dapai;
 };
 
 /**
  * 副露 (fulou)
  */
+export type Fulou = {
+  /** 手番。(0: 東家、1: 南家、2: 西家、3: 北家) */
+  l: number;
+  /** 副露した面子。 */
+  m: Mentu;
+};
+
+/** 副露メッセージ */
 export type MessageFulou = {
   /** 副露 */
-  fulou: {
-    /** 手番。(0: 東家、1: 南家、2: 西家、3: 北家) */
-    l: number;
-    /** 副露した面子。 */
-    m: Mentu;
-  };
+  fulou: Fulou;
 };
 
 /**
  * 槓 (gang)
  */
+export type Gang = {
+  /** 手番。(0: 東家、1: 南家、2: 西家、3: 北家) */
+  l: number;
+  /** 槓した 面子。大明槓は副露として扱うので、ここでの槓は暗槓もしくは加槓。 */
+  m: Mentu;
+};
+
+/** 槓メッセージ */
 export type MessageGang = {
   /** 槓 */
-  gang: {
-    /** 手番。(0: 東家、1: 南家、2: 西家、3: 北家) */
-    l: number;
-    /** 槓した 面子。大明槓は副露として扱うので、ここでの槓は暗槓もしくは加槓。 */
-    m: Mentu;
-  };
+  gang: Gang;
 };
 
 /**
  * 槓自摸 (gangzimo)
  */
+export type Gangzimo = {
+  /** 手番。(0: 東家、1: 南家、2: 西家、3: 北家) */
+  l: number;
+  /** ツモった 牌。 */
+  p: Hai;
+};
+
+/** 槓自摸メッセージ */
 export type MessageGangzimo = {
   /** 槓自摸 */
-  gangzimo: {
-    /** 手番。(0: 東家、1: 南家、2: 西家、3: 北家) */
-    l: number;
-    /** ツモった 牌。 */
-    p: Hai;
-  };
+  gangzimo: Gangzimo;
 };
 
 /**
  * 開槓 (kaigang)
  */
+export type Kaigang = {
+  /** ドラ表示牌。 */
+  baopai: Hai;
+};
+
+/** 開槓メッセージ */
 export type MessageKaigang = {
   /** 開槓 */
-  kaigang: {
-    /** ドラ表示牌。 */
-    baopai: Hai;
-  };
+  kaigang: Kaigang;
 };
 
 /**
  * 和了 (hule)
  */
+export type Hule = {
+  /** 和了者。(0: 東家、1: 南家、2: 西家、3: 北家) */
+  l: number;
+  /** 和了者の牌姿。ロン和了の場合は和了牌をツモした牌姿にする。 */
+  shoupai: Haisi;
+  /** 放銃者。ツモ和了の場合は null。 */
+  baojia: number | null;
+  /** 裏ドラ表示牌の配列。リーチでない場合は null。 */
+  fubaopai: string[] | null;
+  /** 符。役満の場合は undefined。 */
+  fu: number | undefined;
+  /** 翻数。役満の場合は undefined。 */
+  fanshu: number | undefined;
+  /** 役満複合数。複合には四暗刻をダブル役満にする類のものと、大三元と字一色の複合のような役の複合のケースがある。役満でない場合は undefined。 */
+  damanguan: number | undefined;
+  /** 和了打点。供託収入は含まない。 */
+  defen: number;
+  /** 和了役の配列。 */
+  hupai: MessageHule_Hupai[];
+  /** 供託を含めたその局の点数の収支。その局の東家から順に並べる。リーチ宣言による1000点減は収支に含めない。 */
+  fenpai: [number, number, number, number];
+};
+
+/** 和了メッセージ */
 export type MessageHule = {
   /** 和了 */
-  hule: {
-    /** 和了者。(0: 東家、1: 南家、2: 西家、3: 北家) */
-    l: number;
-    /** 和了者の牌姿。ロン和了の場合は和了牌をツモした牌姿にする。 */
-    shoupai: Haisi;
-    /** 放銃者。ツモ和了の場合は null。 */
-    baojia: number | null;
-    /** 裏ドラ表示牌の配列。リーチでない場合は null。 */
-    fubaopai: string[] | null;
-    /** 符。役満の場合は undefined。 */
-    fu: number | undefined;
-    /** 翻数。役満の場合は undefined。 */
-    fanshu: number | undefined;
-    /** 役満複合数。複合には四暗刻をダブル役満にする類のものと、大三元と字一色の複合のような役の複合のケースがある。役満でない場合は undefined。 */
-    damanguan: number | undefined;
-    /** 和了打点。供託収入は含まない。 */
-    defen: number;
-    /** 和了役の配列。 */
-    hupai: MessageHule_Hupai[];
-    /** 供託を含めたその局の点数の収支。その局の東家から順に並べる。リーチ宣言による1000点減は収支に含めない。 */
-    fenpai: [number, number, number, number];
-  };
+  hule: Hule;
 };
 
 /**
@@ -224,16 +251,19 @@ export type MessageHule_Hupai = {
 /**
  * 流局
  */
+export type Pingju = {
+  /** 流局理由。 */
+  name: string;
+  /** 流局時の手牌。その局の東家から順に並べる。ノーテンなどの理由により手牌を開示しなかった場合は空文字列とする。 */
+  shoupai: [string, string, string, string];
+  /** ノーテン罰符などその局の点数の収支。その局の東家から順に並べる。リーチ宣言による1000点減は収支に含めない。 */
+  fenpai: [number, number, number, number];
+};
+
+/** 流局メッセージ */
 export type MessagePingju = {
   /** 流局 */
-  pingju: {
-    /** 流局理由。 */
-    name: string;
-    /** 流局時の手牌。その局の東家から順に並べる。ノーテンなどの理由により手牌を開示しなかった場合は空文字列とする。 */
-    shoupai: [string, string, string, string];
-    /** ノーテン罰符などその局の点数の収支。その局の東家から順に並べる。リーチ宣言による1000点減は収支に含めない。 */
-    fenpai: [number, number, number, number];
-  };
+  pingju: Pingju;
 };
 
 /** 終局 */
@@ -342,3 +372,8 @@ export type Mentu = string;
   - 純手牌内の _ は、伏せられていて不明な牌を表す。
  */
 export type Haisi = string;
+
+/**
+ * 描画の際に使用する卓に関する情報を表現するオブジェクト
+ */
+export type Model = {};

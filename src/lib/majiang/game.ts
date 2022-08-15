@@ -5,7 +5,7 @@
 
 import Player from "./player";
 import Shoupai from "./shoupai";
-import { Hai, Mentu, Message, Rule } from "./types";
+import { Hai, Mentu, Message, MessageReply, Paipu, Rule } from "./types";
 
 const Majiang = {
   rule: require("./rule"),
@@ -16,6 +16,119 @@ const Majiang = {
 };
 
 export default class Game {
+  /**
+   * インスタンス生成時に指定された Majiang.Player の配列。
+   */
+  _players: Player[];
+  /**
+   * インスタンス生成時に指定された対局終了時に呼び出す関数。
+   */
+  _callback?: function[];
+  /**
+   * インスタンス生成時に指定された ルール。
+   */
+  _rule: Rule;
+  /**
+   * 卓情報。
+   */
+  _model: Model;
+  /**
+   * 卓情報 を描画するクラス。 Majiang.Game からは適切なタイミングでメソッドを呼び出して描画のきっかけを与える。
+   */
+  _view?: View;
+  /**
+   * 牌譜。
+   */
+  _paipu: Paipu;
+  /**
+   * Majiang.Game#call_players を呼び出した際の type を保存する。
+   */
+  _status: string;
+  /**
+   * 対局者からの応答を格納する配列。 Majiang.Game#call_players 呼び出し時に配列を生成する。
+   */
+  _reply: MessageReply[];
+  /**
+   * 最終局(オーラス)の局数。東風戦の場合、初期値は 3。東南戦なら 7。 延長戦により最終局が移動する場合はこの値を変更する。
+   */
+  _max_jushu: number;
+  /**
+   * 第一ツモ巡の間は true。
+   */
+  _diyizimo: boolean;
+  /**
+   * 四風連打の可能性がある間は true。
+   */
+  _fengpai: boolean;
+  /**
+   * 最後に打牌した 牌。次の打牌で上書きする。
+   */
+  _dapai: Hai;
+  /**
+   * 現在処理中のカンの 面子。開槓すると null に戻す。
+   */
+  _gang: Mentu;
+  /**
+   * 各対局者(その局の東家からの順)のリーチ状態を示す配列。 0: リーチなし、1: 通常のリーチ、2: ダブルリーチ。
+   */
+  _lizhi: [0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2, 0 | 1 | 2];
+  /**
+   * 各対局者が一発可能かを示す配列。 添え字は手番(0: 東、1: 南、2: 西、3: 北)。
+   */
+  _yifa: [boolean, boolean, boolean, boolean];
+  /**
+   * 各対局者が行ったカンの数。 添え字は手番(0: 東、1: 南、2: 西、3: 北)。
+   */
+  _n_gang: [number, number, number, number];
+  /**
+   * 各対局者のフリテン状態。 添え字は手番(0: 東、1: 南、2: 西、3: 北)。 ロン和了可能なら true。
+   */
+  _neng_rong: [boolean, boolean, boolean, boolean];
+  /**
+   * 和了応答した対局者の手番(0: 東、1: 南、2: 西、3: 北)の配列。 南家、西家のダブロンの時は [ 1, 2 ] となる。
+   */
+  _hule: (0 | 1 | 2 | 3)[];
+  /**
+   * 処理中の和了が槍槓のとき qiangang、嶺上開花のとき lingshang、それ以外なら null。
+   */
+  _hule_option: "qiangang" | "lingshang" | null;
+  /**
+   * 途中流局の処理中のとき true。
+   */
+  _no_game: boolean;
+  /**
+   * 連荘の処理中のとき true。
+   */
+  _lianzhuang: boolean;
+  /**
+   * 現在処理中の局開始時の積み棒の数。
+   */
+  _changbang: number;
+  /**
+   * 現在処理中の和了、あるいは流局で移動する点数の配列。 添え字は手番(0: 東、1: 南、2: 西、3: 北)。
+   */
+  _fenpei: [number, number, number, number];
+  /**
+   * true の場合、同期モードとなり、setTimeout() による非同期呼び出しは行わない。
+   */
+  _sync: boolean;
+  /**
+   * 関数が設定されている場合、Majiang.Game#next 呼び出しの際にその関数を呼び出して処理を停止する。
+   */
+  _stop?: function;
+  /**
+   * 局の進行速度。0～5 で指定する。初期値は 3。 指定された速度 × 200(ms) で Majiang.Game#next を呼び出すことで局の進行速度を調整する。
+   */
+  _speed: 0 | 1 | 2 | 3 | 4 | 5;
+  /**
+   * ダイアログへの応答速度(ms)。初期値は 0。 指定された時間後に Majiang.Game#next を呼び出す。
+   */
+  _wait: number;
+  /**
+   * 非同期で Majiang.Game#next を呼び出すタイマーのID。 値が設定されていれば非同期呼出し待ちであり、clearTimeout() を呼び出せば非同期呼出しをキャンセルできる。
+   */
+  _timeout_id?: any;
+
   /**
    *players で指定された4名を対局者とし、rule で指定されたルールにしたがい対局を行う。 対局終了時に callback で指定した関数が呼ばれる(対局の牌譜が引数で渡される)。 title で牌譜に残すタイトルを指定できる。 rule を省略した場合は、Majiang.rule() の呼び出しで得られるルールの初期値が採用される。
    * @param {Majiang.Player[]} players
@@ -1330,12 +1443,18 @@ export default class Game {
    * Majiang.Shoupai#get_gang_mianzi を呼び出し、rule にしたがって shoupai からカン可能な面子の一覧を返す。 p が指定された場合は大明槓、null の場合は暗槓と加槓が対象になる。 paishu には現在の残り牌数、n_gang にはその局に行われた槓の数を指定すること。
    * @param {Rule} rule
    * @param {Majiang.Shoupai} shoupai
-   * @param {string} p
+   * @param {Hai} p
    * @param {number} paishu
    * @param {number} n_gang
-   * @returns {string[]}
+   * @returns {Hai[]}
    */
-  static get_gang_mianzi(rule: Rule, shoupai: Shoupai, p: Hai, paishu, n_gang) {
+  static get_gang_mianzi(
+    rule: Rule,
+    shoupai: Shoupai,
+    p: Hai,
+    paishu: number,
+    n_gang: number
+  ): Hai[] {
     let mianzi = shoupai.get_gang_mianzi(p);
     if (!mianzi || mianzi.length == 0) return mianzi;
 
@@ -1369,13 +1488,19 @@ export default class Game {
   /**
    * rule にしたがって shoupai からリーチ可能か判定する。 p が null のときはリーチ可能な打牌一覧を返す。 p が 牌 のときは p を打牌してリーチ可能なら true を返す。 paishu には現在の残り牌数、defen には現在の持ち点を指定すること。
    * @param {Rule} rule
-   * @param {Majiang.Shoupai} shoupai
-   * @param {string} p
+   * @param {Shoupai} shoupai
+   * @param {Hai} p
    * @param {number} paishu
    * @param {number} defen
    * @returns {string[]|boolean}
    */
-  static allow_lizhi(rule, shoupai, p, paishu, defen) {
+  static allow_lizhi(
+    rule: Rule,
+    shoupai: Shoupai,
+    p: Hai,
+    paishu: number,
+    defen: number
+  ) {
     if (!shoupai._zimo) return false;
     if (shoupai.lizhi) return false;
     if (!shoupai.menqian) return false;
@@ -1408,8 +1533,8 @@ export default class Game {
 
   /**
    * rule にしたがって shoupai で和了可能か判定する。 p が null のときはツモ和了可能なら true を返す。 p が 牌 のときは p でロン和了可能なら true を返す。 zhuangfeng には場風(0: 東、1: 南、2: 西、3: 北)、menfeng には自風、状況役があるときは hupai に true、フリテンのときは neng_rong に false を指定すること。
-   * @param {Majiang.Rule} rule
-   * @param {Majiang.Shoupai} shoupai
+   * @param {Rule} rule
+   * @param {Shoupai} shoupai
    * @param {string} p
    * @param {number} zhuangfeng
    * @param {number} menfeng
@@ -1417,7 +1542,15 @@ export default class Game {
    * @param {boolean} neng_rong
    * @returns {boolean}
    */
-  static allow_hule(rule, shoupai, p, zhuangfeng, menfeng, hupai, neng_rong) {
+  static allow_hule(
+    rule: Rule,
+    shoupai: Shoupai,
+    p: Hai,
+    zhuangfeng: number,
+    menfeng: number,
+    hupai: boolean,
+    neng_rong: boolean
+  ): boolean {
     if (p && !neng_rong) return false;
 
     let new_shoupai = shoupai.clone();

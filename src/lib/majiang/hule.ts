@@ -746,7 +746,7 @@ function hule_param(param = {}) {
   return rv;
 }
 
-module.exports = {
+export default {
   hule: hule,
   hule_param: hule_param,
   hule_mianzi: hule_mianzi,
