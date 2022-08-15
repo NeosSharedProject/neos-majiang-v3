@@ -3,7 +3,7 @@
  *  Majiang.Player
  */
 import Board from "./board";
-import { Message, MessageKaiju, MessageReply } from "./types";
+import { Message, MessageKaiju, MessageReply, Paipu } from "./types";
 import Game from "./game";
 import Util from "./util";
 
@@ -21,8 +21,15 @@ if (h.a) {
 }
 
 export default class Player {
+  _id: number;
   _callback: () => {} | null;
+  _rule: Rule;
   _model: Board;
+  _menfeng: number;
+  _diyizimo: boolean;
+  _n_gang: number;
+  _neng_rong: boolean;
+  _paipu: Paipu;
   /**
    * _model に空の卓情報をもつインスタンスを生成する。
    */
