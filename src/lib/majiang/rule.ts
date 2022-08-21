@@ -2,7 +2,6 @@
 /*
  *  Majinng.rule
  */
-"use strict";
 
 export default function (param = {}) {
   let rule = {
