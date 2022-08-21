@@ -2,11 +2,12 @@
 /*
  *  Majiang.Util.hule
  */
-"use strict";
+import Shan from "./shan";
+import rule from "./rule";
 
 const Majiang = {
-  Shan: require("./shan"),
-  rule: require("./rule"),
+  Shan,
+  rule,
 };
 
 function mianzi(s, bingpai, n = 1) {
