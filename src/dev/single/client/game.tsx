@@ -7,10 +7,12 @@ function Seat({
   shoupai,
   he,
   player,
+  defen,
 }: {
   shoupai: Model["shoupai"][0];
   he: Model["he"][0];
   player: any;
+  defen: number;
 }) {
   const zimo = shoupai._zimo?.substring(0, 2) ?? "";
   const tehaiList = _.flatMap([
@@ -36,38 +38,124 @@ function Seat({
     ),
   ]);
 
+  const fulouList = shoupai._fulou.map((mentu) => {
+    const haiType = mentu.substring(0, 1);
+    const nMentuStr = mentu.replace("+", "").replace("=", "").replace("-", "");
+    const target = _.find(
+      mentu,
+      (str) => str === "+" || str === "=" || str === "-",
+      undefined
+    );
+    const sRotatedHaiInbdex =
+      Number(
+        _.max([mentu.indexOf("+"), mentu.indexOf("="), mentu.indexOf("-")])
+      ) - 2;
+    const type =
+      nMentuStr.length === 4
+        ? !target
+          ? "ankan"
+          : nMentuStr.substring(1, 2).replace("0", "5") ===
+            nMentuStr.substring(2, 3).replace("0", "5")
+          ? "pon"
+          : "chii"
+        : mentu.substring(4, 5) === "+" ||
+          mentu.substring(4, 5) === "=" ||
+          mentu.substring(4, 5) === "-"
+        ? "minkan"
+        : "kakan";
+    const sHaiList = _.range(nMentuStr.length - 1).map((num) => {
+      return `${haiType}${nMentuStr.substring(num + 1, num + 2)}`;
+    });
+    const fHaiList = sHaiList.filter(
+      (_v, index) => index !== sRotatedHaiInbdex
+    );
+    const rotatedHai = sHaiList[sRotatedHaiInbdex];
+    return {
+      haiList: (() => {
+        switch (target) {
+          case "+":
+            return [fHaiList[0], fHaiList[1], rotatedHai, ...fHaiList.slice(2)];
+          case "=":
+            return [fHaiList[0], rotatedHai, ...fHaiList.slice(1)];
+          case "-":
+            return [rotatedHai, ...fHaiList];
+          default:
+            return sHaiList;
+        }
+      })(),
+      rotatedHaiInbdex: _.get(
+        {
+          "+": 2,
+          "=": 1,
+          "-": 0,
+        },
+        target ?? ""
+      ),
+      target,
+      type,
+    };
+  });
+
   return (
     <>
-      <div>{player}</div>
       <div>
-        捨牌：{he._pai.map((hai) => _.get(haiEmojiMap, hai.substring(0, 2)))}
+        {player}-{defen}
       </div>
-      <div>
+      <div style={{ display: "flex" }}>
+        捨牌：
+        {he._pai.map((hai) => {
+          const style = (() => {
+            switch (hai.substring(2, 3)) {
+              case "_":
+                return { background: "gray" };
+              case "*":
+                return { transform: "rotate(90deg)" };
+              case "+":
+                return { opacity: 0.4 };
+              case "=":
+                return { opacity: 0.4 };
+              case "-":
+                return { opacity: 0.4 };
+              default:
+                return {};
+            }
+          })();
+          return (
+            <div style={style}>{_.get(haiEmojiMap, hai.substring(0, 2))}</div>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex" }}>
         手牌：
-        {tehaiList.map((hai) => _.get(haiEmojiMap, hai))}-
-        {_.get(haiEmojiMap, zimo)}
+        {tehaiList.map((hai) => (
+          <div>{_.get(haiEmojiMap, hai)}</div>
+        ))}
+        -{_.get(haiEmojiMap, zimo)}-
+        {fulouList.map((mentu) => {
+          return (
+            <>
+              {mentu.haiList.map((hai, index) => {
+                const isRotated = index === mentu.rotatedHaiInbdex;
+                return (
+                  <div style={isRotated ? { transform: `rotate(90deg)` } : {}}>
+                    {_.get(haiEmojiMap, hai)}
+                  </div>
+                );
+              })}
+            </>
+          );
+        })}
       </div>
     </>
   );
 }
 
-async function fetcher(url: string) {
-  const response = await fetch(url);
-  return response.json();
-}
-
 export default function Game({ sessionId }: { sessionId: string }) {
-  const [gameGnerated, setGameGenerated] = useState<boolean>(false);
   const [data, setData] = useState<Model | undefined>(undefined);
+  const wsRef = useRef<WebSocket | undefined>(undefined);
 
   useEffect(() => {
-    fetch("/api/entry", { method: "post" }).then(() => {
-      setGameGenerated(true);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (gameGnerated) {
+    if (!wsRef.current || wsRef.current.CLOSED) {
       const ws = new WebSocket("ws://localhost:3000/");
       ws.onmessage = (event: any) => {
         try {
@@ -76,8 +164,9 @@ export default function Game({ sessionId }: { sessionId: string }) {
           console.error(e);
         }
       };
+      wsRef.current = ws;
     }
-  }, [gameGnerated]);
+  }, [sessionId]);
 
   return (
     <>
@@ -90,6 +179,7 @@ export default function Game({ sessionId }: { sessionId: string }) {
                 he={data.he[num]}
                 shoupai={data.shoupai[num]}
                 player={data.player[num]}
+                defen={data.defen[num]}
               />
             );
           })}
