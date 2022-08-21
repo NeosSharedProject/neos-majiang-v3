@@ -2,7 +2,6 @@
 /*
  *  Majiang.Shoupai
  */
-"use strict";
 
 export default class Shoupai {
   static valid_pai(p: Hai) {

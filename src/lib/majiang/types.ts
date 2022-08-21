@@ -433,7 +433,7 @@ export type Model = {
       ];
       z: [number, number, number, number, number, number, number, number];
     };
-    _fulou: Hai[];
+    _fulou: Mentu[];
     _zimo: Hai | null;
     _lizhi: boolean;
   }[];

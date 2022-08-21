@@ -1,8 +1,9 @@
 // @ts-nocheck
 
 import { Hai, Rule } from "./types";
+import Shoupai from "./shoupai";
 
-const Majiang = { Shoupai: require("./shoupai") };
+const Majiang = { Shoupai };
 
 export default class Shan {
   /**
