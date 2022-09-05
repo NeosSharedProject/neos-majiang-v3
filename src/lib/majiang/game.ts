@@ -10,6 +10,7 @@ import defaultRule from "./rule";
 import Shan from "./shan";
 import He from "./he";
 import Util from "./util";
+import View from "./view";
 
 // const Majiang = {
 //   rule: require("./rule"),
@@ -718,7 +719,7 @@ export default class Game {
    */
   pingju(
     name: string,
-    shoupai: [Haisi | Haisi | Haisi | Haisi] = ["", "", "", ""]
+    shoupai: [Haisi, Haisi, Haisi, Haisi] = ["", "", "", ""]
   ): void {
     let model = this._model;
 
