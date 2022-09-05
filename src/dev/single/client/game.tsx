@@ -1,7 +1,63 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Model } from "../../../lib/majiang/types";
+import { Hai, Model } from "../../../lib/majiang/types";
 import _ from "lodash";
 import haiEmojiMap from "./haiEmojiMap";
+import { WsEvent } from "../types";
+
+function isHai(hai: string): hai is Hai {
+  const result = new RegExp("^[mspz][0-9][\\*_+=-]?$").test(hai);
+  if (!result) {
+    console.debug("isHAi false. hai=", hai);
+  }
+  return result;
+}
+
+function analysisHai(hai: Hai) {
+  return {
+    type: hai.substring(0, 1),
+    num: Number(hai.substring(1, 2)),
+    state: hai.substring(2, 3),
+  };
+}
+
+function isAka(hai: Hai) {
+  const { num } = analysisHai(hai);
+  return num === 0;
+}
+
+function getHaiEmoji(hai: Hai) {
+  const { type, num } = analysisHai(hai);
+  return _.get(haiEmojiMap, isAka(hai) ? `${type}5` : `${type}${num}`);
+}
+
+function HaiView({ hai }: { hai: Hai }) {
+  const { state } = analysisHai(hai);
+  const style = {
+    ...(() => {
+      switch (state) {
+        case "_":
+          return { background: "gray" };
+        case "*":
+          return { transform: "rotate(90deg)" };
+        case "+":
+          return { opacity: 0.4 };
+        case "=":
+          return { opacity: 0.4 };
+        case "-":
+          return { opacity: 0.4 };
+        default:
+          return {};
+      }
+    })(),
+    ...(isAka(hai) ? { color: "red" } : {}),
+  };
+  return (
+    <div style={style}>
+      {/* ${hai} */}
+      {getHaiEmoji(hai)}
+    </div>
+  );
+}
 
 function Seat({
   shoupai,
@@ -103,34 +159,32 @@ function Seat({
       </div>
       <div style={{ display: "flex" }}>
         捨牌：
-        {he._pai.map((hai) => {
-          const style = (() => {
-            switch (hai.substring(2, 3)) {
-              case "_":
-                return { background: "gray" };
-              case "*":
-                return { transform: "rotate(90deg)" };
-              case "+":
-                return { opacity: 0.4 };
-              case "=":
-                return { opacity: 0.4 };
-              case "-":
-                return { opacity: 0.4 };
-              default:
-                return {};
-            }
-          })();
-          return (
-            <div style={style}>{_.get(haiEmojiMap, hai.substring(0, 2))}</div>
-          );
-        })}
+        {he._pai.map((hai) => HaiView({ hai }))}
       </div>
       <div style={{ display: "flex" }}>
         手牌：
-        {tehaiList.map((hai) => (
-          <div>{_.get(haiEmojiMap, hai)}</div>
-        ))}
-        -{_.get(haiEmojiMap, zimo)}-
+        {tehaiList.map((hai) => {
+          if (!isHai(hai)) {
+            return;
+          }
+          return (
+            <button
+              onClick={() => {
+                window.alert(hai);
+              }}
+              style={
+                isAka(hai)
+                  ? {
+                      color: "red",
+                    }
+                  : {}
+              }
+            >
+              {getHaiEmoji(hai)}
+            </button>
+          );
+        })}
+        -{isHai(zimo) ? <HaiView hai={zimo} /> : zimo}-
         {fulouList.map((mentu) => {
           return (
             <>
@@ -157,9 +211,20 @@ export default function Game({ sessionId }: { sessionId: string }) {
   useEffect(() => {
     if (!wsRef.current || wsRef.current.CLOSED) {
       const ws = new WebSocket("ws://localhost:3000/");
-      ws.onmessage = (event: any) => {
+      ws.onmessage = (rawEvent: any) => {
         try {
-          setData(JSON.parse(event.data));
+          const event = JSON.parse(rawEvent.data) as WsEvent;
+          const { type, model } = event;
+          switch (type) {
+            case "update":
+              setData(model);
+              break;
+            case "say":
+              console.debug(type, event.data.code, event);
+              break;
+            default:
+              console.debug(event);
+          }
         } catch (e) {
           console.error(e);
         }
@@ -172,7 +237,10 @@ export default function Game({ sessionId }: { sessionId: string }) {
     <>
       {data && (
         <>
-          <div>山：{data.shan._pai.map((hai) => _.get(haiEmojiMap, hai))}</div>
+          <div style={{ display: "flex" }}>
+            山：
+            {data.shan._pai.map((hai) => HaiView({ hai }))}
+          </div>
           {[0, 1, 2, 3].map((num) => {
             return (
               <Seat
@@ -183,6 +251,11 @@ export default function Game({ sessionId }: { sessionId: string }) {
               />
             );
           })}
+          <p>changbang: {data.changbang}</p>
+          <p>qijia: {data.qijia}</p>
+          <p>lunban: {data.lunban}</p>
+          <p>jushu: {data.jushu}</p>
+          <p>zhuangfeng: {data.zhuangfeng}</p>
         </>
       )}
     </>
