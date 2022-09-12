@@ -2,7 +2,6 @@
 /*
  *  Majiang.He
  */
-"use strict";
 import Shoupai from "./shoupai";
 
 export default class He {

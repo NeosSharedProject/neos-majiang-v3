@@ -2,7 +2,6 @@
 /*
  *  Majiang.Board
  */
-"use strict";
 
 import Shoupai from "./shoupai";
 import He from "./he";

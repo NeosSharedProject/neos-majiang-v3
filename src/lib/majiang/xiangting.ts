@@ -2,7 +2,6 @@
 /*
  *  Majiang.Util.xiangting
  */
-"use strict";
 
 function _xiangting(m, d, g, j) {
   let n = j ? 4 : 5;

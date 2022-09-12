@@ -334,7 +334,6 @@ export type Paipu = {
   point: [string, string, string, string];
 };
 
-//export type HaiName = string;
 export type Hai =
   | `${"m" | "p" | "s" | "z"}${
       | "0"
@@ -376,4 +375,86 @@ export type Haisi = string;
 /**
  * 描画の際に使用する卓に関する情報を表現するオブジェクト
  */
-export type Model = {};
+export type Model = {
+  title: string;
+  player: [string, string, string, string];
+  qijia: number;
+  zhuangfeng: number;
+  jushu: number;
+  changbang: number;
+  lizhibang: number;
+  defen: [number, number, number, number];
+  shan: {
+    _rule: Rule;
+    _pai: Hai[];
+    _baopai: Hai[];
+    _fubaopai: Hai[];
+    _weikaigang: boolean;
+    _closed: boolean;
+  };
+  shoupai: {
+    _bingpai: {
+      _: number;
+      m: [
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number
+      ];
+      p: [
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number
+      ];
+      s: [
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number
+      ];
+      z: [number, number, number, number, number, number, number, number];
+    };
+    _fulou: Mentu[];
+    _zimo: Hai | null;
+    _lizhi: boolean;
+  }[];
+  he: [
+    {
+      _pai: Hai[];
+      _find: Hai[];
+    },
+    {
+      _pai: Hai[];
+      _find: Hai[];
+    },
+    {
+      _pai: Hai[];
+      _find: Hai[];
+    },
+    {
+      _pai: Hai[];
+      _find: Hai[];
+    }
+  ];
+  player_id: [number, number, number, number];
+  lunban: number;
+};

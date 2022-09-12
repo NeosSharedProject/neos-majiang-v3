@@ -7,15 +7,22 @@
  *  https://github.com/kobalab/majiang-core/blob/master/LICENSE
  */
 
-"use strict";
+import rule from "./rule";
+import Shoupai from "./shoupai";
+import Shan from "./shan";
+import He from "./he";
+import Board from "./board";
+import Game from "./game";
+import Player from "./player";
+import Util from "./util";
 
 export default {
-  rule: require("./rule"),
-  Shoupai: require("./shoupai"),
-  Shan: require("./shan"),
-  He: require("./he"),
-  Board: require("./board"),
-  Game: require("./game"),
-  Player: require("./player"),
-  Util: Object.assign(require("./xiangting"), require("./hule")),
+  rule,
+  Shoupai,
+  Shan,
+  He,
+  Board,
+  Game,
+  Player,
+  Util,
 };
