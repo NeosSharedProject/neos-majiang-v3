@@ -1,5 +1,5 @@
-import Game from "./lib/majiang/game";
-import { Rule } from "./lib/majiang/types";
+import Game from "../lib/majiang/game";
+import { Rule } from "../lib/majiang/types";
 import { NeosPlayer } from "./neosPlayer";
 
 export default class NeosGame extends Game {
