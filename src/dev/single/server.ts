@@ -69,10 +69,10 @@ app.post("/api/entry/", async (req: express.Request, res: express.Response) => {
     res.send("ok");
 });
 
-wss.on("connection", (ws) => {
-    if (data) {
-        data.view.ws = ws;
-    }
-});
+// wss.on("connection", (ws) => {
+//     if (data) {
+//         data.view.ws = ws;
+//     }
+// });
 
 server.listen(3000, () => console.log("dev single ok"));

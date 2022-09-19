@@ -20,7 +20,7 @@ export class WSPlayer extends Player {
     action_zimo(zimo: Zimo | null, gangzimo: Gangzimo | null) {
         if (zimo?.l != this._menfeng) return this._callback();
         console.log(this._model.shoupai[this._menfeng]._bingpai)
-        this._callback({ dapai: "m3" });
+        // this._callback({ dapai: "m3" });
         // this?._callback();
     }
 

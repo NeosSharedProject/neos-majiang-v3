@@ -7,19 +7,6 @@ import { Message, MessageKaiju, MessageReply, Paipu } from "./types";
 import Game from "./game";
 import Util from "./util";
 
-type hoge = {
-  a: {
-    c: number;
-  };
-};
-type hage = { b: { b: string } };
-type hamage = hoge | hage;
-
-const h: hamage = { a: { c: 10 } };
-if (h.a) {
-  h;
-}
-
 export default class Player {
   _id: number;
   _callback: (...args?) => {} | null;
