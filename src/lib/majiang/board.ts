@@ -23,6 +23,7 @@ class Shan {
 }
 
 export default class Board {
+  shoupai: any;
   constructor(kaiju) {
     if (kaiju) this.kaiju(kaiju);
   }

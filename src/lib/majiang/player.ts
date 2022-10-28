@@ -7,22 +7,9 @@ import { Message, MessageKaiju, MessageReply, Paipu } from "./types";
 import Game from "./game";
 import Util from "./util";
 
-type hoge = {
-  a: {
-    c: number;
-  };
-};
-type hage = { b: { b: string } };
-type hamage = hoge | hage;
-
-const h: hamage = { a: { c: 10 } };
-if (h.a) {
-  h;
-}
-
 export default class Player {
   _id: number;
-  _callback: () => {} | null;
+  _callback: (...args?) => {} | null;
   _rule: Rule;
   _model: Board;
   _menfeng: number;
@@ -97,7 +84,7 @@ export default class Player {
     if (this._callback) this.action_kaiju(kaiju);
   }
 
-  /**
+  /**　最初の配牌
    * qipai から 卓情報 を設定し、Majiang.Player#action_qipai を呼び出し応答を返す。
    * @param {Majiang.Message} qipai メッセージ#配牌
    */
@@ -123,7 +110,7 @@ export default class Player {
     if (this._callback) this.action_qipai(qipai);
   }
 
-  /**
+  /** ツモ
    * zimo から 卓情報 を設定し、Majiang.Player#action_zimo を呼び出し応答を返す。 gangzimo が真の場合は槓自摸を表す。
    * @param {Majiang.Message} zimo メッセージ#自摸 (もしくは メッセージ#槓自摸)
    * @param {boolean} gangzimo
@@ -135,7 +122,7 @@ export default class Player {
     if (this._callback) this.action_zimo(zimo, gangzimo);
   }
 
-  /**
+  /** 捨てる
    * dapai から 卓情報 を設定し、Majiang.Player#action_dapai を呼び出し応答を返す。
    * @param {Majiang.Message} dapai メッセージ#打牌
    */

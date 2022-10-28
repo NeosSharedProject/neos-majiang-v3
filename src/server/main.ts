@@ -1,5 +1,5 @@
 import NeosGame from "./neosgame";
-import Player from "./lib/majiang/player";
+import Player from "../lib/majiang/player";
 import ws from "ws";
 import http from "http";
 import express from "express";

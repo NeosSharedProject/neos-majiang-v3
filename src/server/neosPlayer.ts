@@ -1,4 +1,4 @@
-import Player from "./lib/majiang/player";
+import Player from "../lib/majiang/player";
 import {
   Kaiju,
   Qipai,
@@ -10,7 +10,7 @@ import {
   Hule,
   Pingju,
   Paipu,
-} from "./lib/majiang/types";
+} from "../lib/majiang/types";
 import ws from "ws";
 
 export class NeosPlayer extends Player {
