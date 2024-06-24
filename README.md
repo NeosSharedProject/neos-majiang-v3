@@ -1,6 +1,23 @@
-# majiang-core
+![](readme_header.png)
+# なにこれ
+- Neos麻雀のv3APIサーバ
 
-麻雀基本ライブラリ
+# 機能
+- Neos向けAPI
+- Webフロントエンド
+- 
+## インストール
+```sh
+$ npm i
+```
+## デバッグ
+```shell
+$ npm run dev
+```
+
+
+# 以下フォーク元 readme
+https://github.com/kobalab/majiang-core
 
 ## インストール
 ```sh
